@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shiro.springboot_jsp_shiro.dao.UserDao">
+    <insert id="save" parameterType="com.shiro.springboot_jsp_shiro.entity.User" useGeneratedKeys="true" keyProperty="id">
+        insert into j_user values (#{id},#{username},#{password},#{salt})
+    </insert>
+    <select id="findByUserName" resultType="com.shiro.springboot_jsp_shiro.entity.User">
+        select id,username,password,salt
+        from j_user
+        where username = #{username}
+    </select>
+
+    <resultMap id="userMap" type="com.shiro.springboot_jsp_shiro.entity.User">
+        <id column="uid" property="id"/>
+        <result column="username" property="username" />
+        <collection property="roles" javaType="list" ofType="com.shiro.springboot_jsp_shiro.entity.Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+        </collection>
+    </resultMap>
+    <select id="findRolesByUserName" resultMap="userMap" >
+        select u.id as "uid",u.username as "username",r.id as "rid",r.name as "rname"
+        from j_user u
+        left join j_user_role ur on u.id = ur.userid
+        left join j_role r on ur.roleid = r.id
+        where u.username = #{username}
+    </select>
+
+    <select id="findPermissionsByRoleId" resultType="com.shiro.springboot_jsp_shiro.entity.Permission">
+        select p.id,p.name,p.url
+        from j_role r
+        left join j_role_permission rp on r.id = rp.roleid
+        left join j_permission p on rp.permissionid = p.id
+        where r.id = #{roleId}
+    </select>
+
+
+</mapper>
